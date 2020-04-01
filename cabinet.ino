@@ -1,28 +1,22 @@
-/*
-  Fading
+#include <Adafruit_NeoPixel.h>
+#include <avr/power.h>
 
-  This example shows how to fade an LED using the analogWrite() function.
+#define DOOR_PIN 2
+#define TOPLIGHT_PIN 3
+#define STRIP_PIN 4
+#define NUM_PIXELS 20
 
-  The circuit:
-  - LED attached from digital pin 9 to ground.
+#define FADE_TIME 2000    // 2 seconds
+#define TIMEOUT 120000   // 2 minutes
 
-  created 1 Nov 2008
-  by David A. Mellis
-  modified 30 Aug 2011
-  by Tom Igoe
-
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Fading
-*/
-
-int DOOR_PIN = 1;
-int TOPLIGHT_PIN = 3;
-
-unsigned long fadeTime = 5000;    // 5 seconds
-unsigned long timeout = 120000;   // 2 minutes
+// Strip color
+#define STRIP_RED 0
+#define STRIP_GREEN 0
+#define STRIP_BLUE 255
 
 unsigned long start;
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 void setupPins() {
   pinMode(DOOR_PIN, INPUT);
@@ -34,31 +28,40 @@ void reset() {
 }
 
 void setup() {
+  // Serial.begin(9600);
   setupPins();
+  strip.begin();
   reset();
 }
 
 void loop() {
    if (!doorOpen()) {
+    Serial.println("Door closed");
     reset();
     return;
    }
 
    if (start == 0) {
+    Serial.println("Start new cycle");
     start = millis();
    }
 
    if (isFading()) {
+    Serial.print("Fading ");
     float fade = fadeValue();
+    Serial.print(fade);
+    Serial.println(" %");
     allFade(fade);
     return;
    }
 
    if (isTimeout()) {
+    Serial.println("Timeout");
     allOff();
     return;
    }
 
+   Serial.println("Full");
    allFull();
 }
 
@@ -67,15 +70,15 @@ bool doorOpen() {
 }
 
 bool isFading() {
-  return (start + fadeTime) > millis();
+  return (start + FADE_TIME) > millis();
 }
 
 bool isTimeout() {
-  return (start + timeout) <= millis();
+  return (start + TIMEOUT) <= millis();
 }
 
 float fadeValue() {
-  return ((start + fadeTime) - millis()) / fadeTime;
+  return ((float) (millis() - start)) / (float) FADE_TIME;
 }
 
 void topLightFade(float fadeValue) {
@@ -91,14 +94,37 @@ void topLightOff() {
   analogWrite(TOPLIGHT_PIN, 0);
 }
 
+void stripFade(float fadeValue) {
+  int red = (int) (STRIP_RED * fadeValue);
+  int green = (int) (STRIP_GREEN * fadeValue);
+  int blue = (int) (STRIP_BLUE * fadeValue);
+  uint32_t color = strip.Color(red, green, blue);
+  strip.fill(color, 0, NUM_PIXELS);
+  strip.show();
+}
+
+void stripOff() {
+  strip.clear();
+  strip.show();
+}
+
+void stripFull() {
+  uint32_t color = strip.Color(STRIP_RED, STRIP_GREEN, STRIP_BLUE);
+  strip.fill(color, 0, NUM_PIXELS);
+  strip.show();
+}
+
 void allFade(float fadeValue) {
   topLightFade(fadeValue);
+  stripFade(fadeValue);
 }
 
 void allOff() {
   topLightOff();
+  stripOff();
 }
 
 void allFull() {
   topLightFull();
+  stripFull();
 }
