@@ -4,7 +4,7 @@
 #define DOOR_PIN 2
 #define TOPLIGHT_PIN 3
 #define STRIP_PIN 4
-#define NUM_PIXELS 20
+#define NUM_PIXELS 24
 
 #define FADE_TIME 2000    // 2 seconds
 #define TIMEOUT 120000   // 2 minutes
