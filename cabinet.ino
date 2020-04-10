@@ -34,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-   if (!doorOpen()) {
+   if (doorClosed()) {
     reset();
     return;
    }
@@ -57,12 +57,12 @@ void loop() {
    allFull();
 }
 
-bool doorOpen() {
-  return digitalRead(DOOR_PIN) == HIGH;
+bool doorClosed() {
+  return digitalRead(DOOR_PIN) == LOW;
 }
 
 bool isFading() {
-  return (start + FADE_TIME) > millis();
+  return (start + FADE_TIME) >= millis();
 }
 
 bool isTimeout() {
@@ -74,7 +74,7 @@ float fadeValue() {
 }
 
 void topLightFade(float fadeValue) {
-  int val = (int) (255 * fadeValue)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ;
+  byte val = (byte) (255 * fadeValue)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ;
   analogWrite(TOPLIGHT_PIN, val);
 }
 
@@ -87,9 +87,9 @@ void topLightOff() {
 }
 
 void stripFade(float fadeValue) {
-  int red = (int) (STRIP_RED * fadeValue);
-  int green = (int) (STRIP_GREEN * fadeValue);
-  int blue = (int) (STRIP_BLUE * fadeValue);
+  byte red = (byte) (STRIP_RED * fadeValue);
+  byte green = (byte) (STRIP_GREEN * fadeValue);
+  byte blue = (byte) (STRIP_BLUE * fadeValue);
   uint32_t color = strip.Color(red, green, blue);
   strip.fill(color, 0, NUM_PIXELS);
   strip.show();
