@@ -28,7 +28,6 @@ void reset() {
 }
 
 void setup() {
-  // Serial.begin(9600);
   setupPins();
   strip.begin();
   reset();
@@ -36,32 +35,25 @@ void setup() {
 
 void loop() {
    if (!doorOpen()) {
-    Serial.println("Door closed");
     reset();
     return;
    }
 
    if (start == 0) {
-    Serial.println("Start new cycle");
     start = millis();
    }
 
    if (isFading()) {
-    Serial.print("Fading ");
     float fade = fadeValue();
-    Serial.print(fade);
-    Serial.println(" %");
     allFade(fade);
     return;
    }
 
    if (isTimeout()) {
-    Serial.println("Timeout");
     allOff();
     return;
    }
 
-   Serial.println("Full");
    allFull();
 }
 
